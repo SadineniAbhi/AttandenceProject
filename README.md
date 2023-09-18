@@ -1,5 +1,5 @@
-THIS IS PROJECT IS FOR LEARNING JAVA SCRIPT AND ALSO IMPLEMENTING ATTENDANCE PROJECT.
+This is a full on development project it use linux server in google could. 
 
-INITIAL ACHIVMENTS -- MACH1
+This is project involves Python Imap lib and mysql server and flask web frame works
 
-MAKE AN APP TO MAKE AN TIMER WHICH GIVES OUT NOTIFICATION WHEN THE TIME ENDS.
+AUTHOR ---- ABHIJEETH SADINENI--------
