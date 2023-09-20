@@ -1,7 +1,22 @@
 # This application reads Emails and runs two times every day expect sunday and second-saturday
-from datetime import datetime
+import datetime
 import email
 import imaplib
+import sqlite3
+
+#this block creates the database
+con = sqlite3.Connection("attendence.db")
+cursor = con.cursor()
+
+#This creates the table attendence
+cursor.execute('''
+    CREATE TABLE IF NOT EXISTS attendence(
+        date DATE PRIMARY KEY,
+        time TIME,
+        M TEXT,
+        E TEXT
+    )
+    ''')
 
 #this block connects to my email
 M = imaplib.IMAP4_SSL("imap.gmail.com")
@@ -27,8 +42,7 @@ body = body.decode()
 data  = body.split(' ')
 
 #This Variable is used futher below to check whether biometric is sucssefull or not for inputing into database
-status = None
-ptime = None
+timestring = None
 
 #This block is used to get date, time , status of the biometrics.
 if 'style="color:#DF0101">failed' not in data:
@@ -37,6 +51,39 @@ if 'style="color:#DF0101">failed' not in data:
     time = data[119]
     status = status[3:13]
     date = date[3:13]
-    date= datetime.strptime(date, "%d/%m/%Y").date()
     time = time[3:]
-    time = datetime.strptime(time, "%H:%M:%S").time()
+
+#this block get the date as stirng in us format
+date_parts = date.split('/')
+date = f'{date_parts[2]}-{date_parts[1]}-{date_parts[0]}'
+
+#this block creates time object
+if time!= None:
+    time = datetime.datetime.strptime(time, "%H:%M:%S").time()
+
+
+#db sesctions starts here
+if status and date == str(datetime.date.today()):
+    dbdate = None
+    dbtimestring = None
+    for i in cursor.execute('''SELECT date,time FROM attendence WHERE date = '19/09/2023' '''):
+        dbdate,dbtimestring = i
+    #this block converts the dbtimestring into timeobject
+    dbtime = datetime.datetime.strptime(dbtimestring, "%H:%M:%S").time()
+    if date != dbdate:
+        cursor.execute('''INSERT INTO attendence VALUES(?,?,'p','a')''', (date, time))
+    elif date == dbdate:
+        six_hours = datetime.timedelta(hours=6)
+        time_difference = datetime.timedelta(hours=time.hour - dbtime.hour, minutes=time.minute - dbtime.minute,
+                                             seconds=time.second - dbtime.second)
+        if time_difference>six_hours:
+            value = 'p'
+            cursor.execute('''
+                UPDATE attendence
+                SET E = ?
+                WHERE date = ?
+            ''', (value, date))
+con.commit()
+
+for i in cursor.execute('''SELECT * FROM attendence'''):
+    print(i)
