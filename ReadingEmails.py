@@ -66,12 +66,13 @@ if time!= None:
 if status and date == str(datetime.date.today()):
     dbdate = None
     dbtimestring = None
-    for i in cursor.execute('''SELECT date,time FROM attendence WHERE date = '19/09/2023' '''):
+    for i in cursor.execute('''SELECT date,time FROM attendence WHERE date = ? ''',(date,)):
         dbdate,dbtimestring = i
     #this block converts the dbtimestring into timeobject
-    dbtime = datetime.datetime.strptime(dbtimestring, "%H:%M:%S").time()
+    if dbtimestring!=None:
+        dbtime = datetime.datetime.strptime(dbtimestring, "%H:%M:%S").time()
     if date != dbdate:
-        cursor.execute('''INSERT INTO attendence VALUES(?,?,'p','a')''', (date, time))
+        cursor.execute('''INSERT INTO attendence VALUES(?,?,'p','a')''', (date, str(time)))
     elif date == dbdate:
         six_hours = datetime.timedelta(hours=6)
         time_difference = datetime.timedelta(hours=time.hour - dbtime.hour, minutes=time.minute - dbtime.minute,
