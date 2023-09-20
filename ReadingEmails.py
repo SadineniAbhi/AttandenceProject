@@ -63,7 +63,7 @@ if time!= None:
 
 
 #db sesctions starts here
-if status and date == str(datetime.date.today()):
+if status == 'successful' and date == str(datetime.date.today()):
     dbdate = None
     dbtimestring = None
     for i in cursor.execute('''SELECT date,time FROM attendence WHERE date = ? ''',(date,)):
