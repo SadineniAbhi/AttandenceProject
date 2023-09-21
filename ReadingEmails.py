@@ -43,6 +43,7 @@ data  = body.split(' ')
 
 #This Variable is used futher below to check whether biometric is sucssefull or not for inputing into database
 timestring = None
+status = None
 
 #This block is used to get date, time , status of the biometrics.
 if 'style="color:#DF0101">failed' not in data:
@@ -54,11 +55,10 @@ if 'style="color:#DF0101">failed' not in data:
     time = time[3:]
 
 #this block get the date as stirng in us format
-date_parts = date.split('/')
-date = f'{date_parts[2]}-{date_parts[1]}-{date_parts[0]}'
-
-#this block creates time object
-if time!= None:
+if status == 'successful':
+    date_parts = date.split('/')
+    date = f'{date_parts[2]}-{date_parts[1]}-{date_parts[0]}'
+    # this line creates time object
     time = datetime.datetime.strptime(time, "%H:%M:%S").time()
 
 
