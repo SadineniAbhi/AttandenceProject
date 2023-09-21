@@ -20,7 +20,7 @@ cursor.execute('''
 
 #this block connects to my email
 M = imaplib.IMAP4_SSL("imap.gmail.com")
-M.login('abhisadineni@gmail.com', 'xdho kfaa yfyk krpp')
+M.login('abhisadineni@gmail.com', '*******')
 M.select('inbox')
 
 #this block generates the body of email in html code.
