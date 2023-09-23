@@ -44,7 +44,7 @@ M.select('inbox')
 typ, data = M.search(None,"FROM aadhaar@uidai.gov.in")
 email_id = data[0]
 splited_email = email_id.split(b' ')
-email_id = splited_email[32]
+email_id = splited_email[-1]
 result,email_data = M.fetch(email_id,'(RFC822)')
 raw_email = email_data[0][1]
 raw_email_string = raw_email.decode('utf-8')
