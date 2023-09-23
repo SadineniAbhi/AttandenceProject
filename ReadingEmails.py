@@ -116,6 +116,7 @@ if status == 'successful':
         six_hours = datetime.timedelta(hours=6)
         time_difference = time - dbtime
         print(time_difference)
+        print(date)
         #this block check time diffrence and marks the attendance
         cursor = cnxn.cursor()
         if time_difference>six_hours:

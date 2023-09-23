@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="ProjectRootManager" version="2" project-jdk-name="flaskenv" project-jdk-type="Python SDK" />
+  <component name="Black">
+    <option name="executionMode" value="BINARY" />
+    <option name="pathToExecutable" value="C:\Users\abhis\anaconda3\Scripts\black.exe" />
+    <option name="sdkUUID" value="f868ea1c-6131-4bd8-b1c2-f25f2da2cd8e" />
+  </component>
+  <component name="ProjectRootManager" version="2" project-jdk-name="C:\Users\abhis\anaconda3" project-jdk-type="Python SDK" />
 </project>
