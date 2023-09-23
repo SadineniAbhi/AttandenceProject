@@ -1,11 +1,15 @@
 # This application reads Emails and runs two times every day expect sunday and second-saturday
 import datetime
+import logging
 import email
 import imaplib
 import sqlite3
+
 #google mysql connector
 import mysql.connector
 from mysql.connector.constants import ClientFlag
+
+logging.basicConfig(filename='logs.log',level=logging.DEBUG)
 
 config = {
     'user': 'root',
@@ -37,7 +41,7 @@ cursor.close()
 
 #this block connects to my email
 M = imaplib.IMAP4_SSL("imap.gmail.com")
-M.login('abhisadineni@gmail.com', 'xgcy kyhf yfmj umps')
+M.login('abhisadineni@gmail.com', ENTER YOUR PASSWORD HERE)
 M.select('inbox')
 
 #this block generates the body of email in html code.
@@ -85,9 +89,8 @@ if status == 'successful':
     seconds = int(time_parts[2])
     time= datetime.timedelta(hours=hours, minutes=minutes, seconds=seconds)
 
-
 #db sesctions starts here
-if status == 'successful':
+if status == 'successful' and date == datetime.date.today():
     cursor = cnxn.cursor()
 
     #db --- database inintalized to None if the enrty is not present in db
@@ -106,6 +109,7 @@ if status == 'successful':
     #this block marks morning attendance
     if date != dbdate:
         cursor.execute('''INSERT INTO attendance VALUES(%s,%s,'p','a')''', (date, str(time)))
+        logging.debug("Marking present morning half on {}".format(date))
         cnxn.commit()
         cursor.close()
 
@@ -115,8 +119,6 @@ if status == 'successful':
         #creates sixhours time gap vaiable and caluates the diffrence between the time
         six_hours = datetime.timedelta(hours=6)
         time_difference = time - dbtime
-        print(time_difference)
-        print(date)
         #this block check time diffrence and marks the attendance
         cursor = cnxn.cursor()
         if time_difference>six_hours:
@@ -126,5 +128,6 @@ if status == 'successful':
                 SET E = %s
                 WHERE date = %s
             ''', (value, date))
+            logging.debug("Marking present evening half on {} and time difference is {}".format(date,time_difference))
             cnxn.commit()
             cursor.close()
