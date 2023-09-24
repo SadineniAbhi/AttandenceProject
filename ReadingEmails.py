@@ -138,3 +138,5 @@ if datetime.date.today().weekday() != 6:
             cursor.execute('''INSERT INTO attendance VALUES(%s,%s,'a','a')''', (datetime.date.today(), datetime.timedelta(hours = 4)))
             cnxn.commit()
             cursor.close()
+else:
+    logging.debug("today {} is sunday".format(datetime.date.today()))
