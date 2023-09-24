@@ -12,16 +12,17 @@ from mysql.connector.constants import ClientFlag
 logging.basicConfig(filename='logs.log',level=logging.DEBUG)
 
 config = {
-    'user': 'root',
-    'password': '1234',
-    'host': '34.93.165.3',
+    'user': 'Enter your user',
+    'password': 'Enter your password',
+    'host': 'Enter your host name/ip',
     'client_flags': [ClientFlag.SSL],
-    'ssl_ca': r'C:\Users\abhis\Downloads\server-ca.pem',
-    'ssl_cert': r'C:\Users\abhis\Downloads\client-cert.pem',
-    'ssl_key': r'C:\Users\abhis\Downloads\client-key.pem'
+    #set the ssl crtificaties paths
+    'ssl_ca': r'/enter/path',
+    'ssl_cert': r'/enter/path',
+    'ssl_key': r'/enter/path',
 }
 #this block creates cursor
-config['database'] = 'attendance'
+config['database'] = 'Enter your database name'
 cnxn = mysql.connector.connect(**config)
 cursor = cnxn.cursor()
 
@@ -41,10 +42,10 @@ cursor.close()
 
 #this block connects to my email
 M = imaplib.IMAP4_SSL("imap.gmail.com")
-M.login('abhisadineni@gmail.com', ENTER YOUR PASSWORD HERE)
+M.login('Enter your email', 'enter your password')
 M.select('inbox')
 
-#this block generates the body of email in html code.
+#this block gets the body of email in html code.
 typ, data = M.search(None,"FROM aadhaar@uidai.gov.in")
 email_id = data[0]
 splited_email = email_id.split(b' ')
@@ -82,52 +83,58 @@ if status == 'successful':
     date = datetime.datetime.strptime(date, "%Y-%m-%d").date()
 
     #this block create a timedelta object
-
     time_parts = time.split(':')
     hours = int(time_parts[0])
     minutes = int(time_parts[1])
     seconds = int(time_parts[2])
     time= datetime.timedelta(hours=hours, minutes=minutes, seconds=seconds)
 
+# db --- database inintalized to None if the enrty is not present in db
+dbdate = None
+dbtime = None
+cursor = cnxn.cursor()
+# This block get the dbtime,dbdate
+cursor.execute('''SELECT date, time FROM attendance WHERE date = %s''', (date,))
+result = cursor.fetchone()
+if result is not None:
+    dbdate, dbtime = result
+cursor.close()
+
 #db sesctions starts here
-if status == 'successful' and date == datetime.date.today():
-    cursor = cnxn.cursor()
-
-    #db --- database inintalized to None if the enrty is not present in db
-    dbdate = None
-    dbtime = None
-
-    #This block get the dbtime,dbdate
-    cursor.execute('''SELECT date, time FROM attendance WHERE date = %s''', (date,))
-    result = cursor.fetchone()
-    if result is not None:
-        dbdate, dbtime = result
-    cursor.close()
-    cursor = cnxn.cursor()
-
-    #This block doesn't gets executed if date == dbdate
-    #this block marks morning attendance
-    if date != dbdate:
-        cursor.execute('''INSERT INTO attendance VALUES(%s,%s,'p','a')''', (date, str(time)))
-        logging.debug("Marking present morning half on {}".format(date))
-        cnxn.commit()
-        cursor.close()
-
-    #if date is already present in database then it marks evening attendance
-    elif date == dbdate:
-
-        #creates sixhours time gap vaiable and caluates the diffrence between the time
-        six_hours = datetime.timedelta(hours=6)
-        time_difference = time - dbtime
-        #this block check time diffrence and marks the attendance
+if datetime.date.today().weekday() != 6:
+    if status == 'successful' and date == datetime.date.today():
         cursor = cnxn.cursor()
-        if time_difference>six_hours:
-            value = 'p'
-            cursor.execute('''
-                UPDATE attendance
-                SET E = %s
-                WHERE date = %s
-            ''', (value, date))
-            logging.debug("Marking present evening half on {} and time difference is {}".format(date,time_difference))
+        #This block doesn't gets executed if date == dbdate
+        #this block marks morning attendance
+        if date != dbdate:
+            cursor.execute('''INSERT INTO attendance VALUES(%s,%s,'p','a')''', (date, time))
+            logging.debug("Marking present morning half on {}".format(date))
+            cnxn.commit()
+            cursor.close()
+
+        #if date is already present in database then it marks evening attendance
+        elif date == dbdate:
+
+            #creates sixhours time gap vaiable and caluates the diffrence between the time
+            six_hours = datetime.timedelta(hours=6)
+            time_difference = time - dbtime
+            #this block check time diffrence and marks the attendance
+            cursor = cnxn.cursor()
+            if time_difference>six_hours:
+                value = 'p'
+                cursor.execute('''
+                    UPDATE attendance
+                    SET E = %s
+                    WHERE date = %s
+                ''', (value, date))
+                logging.debug("Marking present evening half on {} and time difference is {}".format(date,time_difference))
+                cnxn.commit()
+                cursor.close()
+    else:
+        #if statement to avoid primary key error.
+        if date != dbdate:
+            logging.debug("you didn't mark attendance at morning marking absent")
+            cursor = cnxn.cursor()
+            cursor.execute('''INSERT INTO attendance VALUES(%s,%s,'a','a')''', (datetime.date.today(), datetime.timedelta(hours = 4)))
             cnxn.commit()
             cursor.close()
